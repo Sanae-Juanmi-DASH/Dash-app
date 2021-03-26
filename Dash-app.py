@@ -35,33 +35,34 @@ table_hp = html.Div([
     )
 ])
 
-#House prices graphs:
-hist_hp = dcc.Graph(id="hp_hist",
-        figure=px.histogram(hp_data['price'], x="price")
-        )
-
-
-scatter_hp=dcc.Graph(id="hp_scatter",
-        figure=px.scatter(hp_data['price'], x="price")
-        )
-
-boxplot_hp=dcc.Graph(id="hp_boxplot",
-        figure=px.scatter(hp_data['garage'], x="garage")
-        )
-
-
 #Dropdown plots:
 fig_names=["Histogram", "Scatter", "Boxplot"]
 dropdown_plot=html.Div([
         html.Label(["Select the type of plot:",
-            dcc.Dropdown(id='my-dropdown',
+            dcc.Dropdown(id='dropdown-plots',
                 options= [{'label': x, 'value': x} for x in fig_names],
                 value= "Histogram",
-                multi= False
+                multi= False,
+                style={"width": "50%"}
             )
         ])
             
 ])
+
+#Dropdown variables:
+dropdown_vars=html.Div([
+        html.Label(["Select a grouping variable:",
+            dcc.Dropdown(id='dropdown-vars',
+                options= [{'label': x, 'value': x} for x in categ_cols_hp],
+                value= "garage",
+                multi= False,
+                style={"width": "50%"}
+            )
+        ])
+            
+])
+
+
 
 #User:
 app.layout = html.Div([
@@ -76,12 +77,13 @@ app.layout = html.Div([
         "background": "MediumAquaMarine"
     }),
     html.Div(id='tabs-content-props'),
-    html.Div(id='plot_dp')
-    
+    html.Div(id='plot_dp') 
 ])
 
 
-#Server:
+##Server:
+
+#Change content in selected tab:
 @app.callback(
     Output('tabs-content-props', 'children'),
     Input('tabs-styled-with-props', 'value'),    
@@ -91,7 +93,8 @@ def render_content(tab):
         return html.Div([
             html.H3('Tab content 1'),
             table_hp,
-            dropdown_plot
+            dropdown_plot,
+            dropdown_vars
         ])
         
     elif tab == 'tab-2':
@@ -100,23 +103,31 @@ def render_content(tab):
         ])
 
 
-#Server:
+
+
+
+#Change plot type:
 @app.callback(
     Output('plot_dp', 'children'),
-    Input('my-dropdown', 'value') 
+    Input('dropdown-plots', 'value'),
+    Input('dropdown-vars','value')
 )
-def render_content(dp):
+def render_plot(dp,vars):
     if  dp=='Scatter':
         return html.Div([
-            scatter_hp
+            dcc.Graph(id="hp_scatter",
+            figure=px.scatter(hp_data, x="price", y="lotsize", color=vars)
+            )
         ])
     elif dp=='Histogram':
         return html.Div([
-            hist_hp
+           dcc.Graph(id="hp_hist",figure=px.histogram(hp_data,x="price", color=vars)
+        )
         ])
     elif dp=='Boxplot':
         return html.Div([
-            boxplot_hp
+            dcc.Graph(id="hp_boxplot",figure=px.box(hp_data,y="price", x=vars)
+        )
         ])    
    
 
