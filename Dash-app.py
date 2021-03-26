@@ -8,6 +8,8 @@ import dash_table as dt
 import pandas as pd
 import plotly.express as px
 import json
+import numpy as np
+import plotly.graph_objects as go
 
 #Creating app:
 app = dash.Dash(__name__, title="Dash App")
@@ -29,10 +31,16 @@ for col in categ_cols_hp:
 table_hp = html.Div([
     dt.DataTable(id="hp_table",
         columns = hp_cols,
-        data= hp_data.to_dict("records")
+        data= hp_data.loc[1:10,].to_dict("records")
     )
 ])
 
+#House prices graphs:
+graph_hp = html.Div([
+        dcc.Graph(id="hp_hist",
+        figure=px.histogram(hp_data['price'], x="price")
+        )
+])
 
 
 #User:
@@ -62,22 +70,14 @@ def render_content(tab):
     if tab == 'tab-1':
         return html.Div([
             html.H3('Tab content 1'),
-            table_hp
+            table_hp,
+            graph_hp
     
         ])
     elif tab == 'tab-2':
         return html.Div([
             html.H3('Tab content 2')
         ])
-
-@app.callback(
-     Output('hp_table', 'data'),
-     Input('data', 'children')
-)
-
-def update_table(data,tab):
-        dff = pd.read_json(data)
-        return dff.to_dict("records")
 
 
 
