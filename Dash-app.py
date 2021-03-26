@@ -26,14 +26,17 @@ for col in categ_cols_hp:
     hp_data[col]= hp_data[col].astype(object)
 
 
-
 #House prices table:
 table_hp = html.Div([
     dt.DataTable(id="hp_table",
         columns = hp_cols,
-        data= hp_data.loc[1:10,].to_dict("records")
-    )
+        data= hp_data.loc[1:10,].to_dict("records"),
+        style_table={'height': '300px', 'overflowY': 'auto'}
+             
+    ),
+     html.Br()
 ])
+
 
 #Dropdown plots:
 fig_names=["Histogram", "Scatter", "Boxplot"]
@@ -43,9 +46,11 @@ dropdown_plot=html.Div([
                 options= [{'label': x, 'value': x} for x in fig_names],
                 value= "Histogram",
                 multi= False,
-                style={"width": "50%"}
+                style={"width": "40%"}
             )
-        ])
+            
+        ]),
+        html.Br()
             
 ])
 
@@ -56,7 +61,7 @@ dropdown_vars=html.Div([
                 options= [{'label': x, 'value': x} for x in categ_cols_hp],
                 value= "garage",
                 multi= False,
-                style={"width": "50%"}
+                style={"width": "40%"}
             )
         ])
             
@@ -68,7 +73,7 @@ dropdown_vars=html.Div([
 app.layout = html.Div([
     html.Div([
         html.H1(app.title, className= "app-header--title")]),
-    dcc.Tabs(id="tabs-styled-with-props", value='tab-1', children=[
+    dcc.Tabs(id="tabs-global", value='tab-1', children=[
         dcc.Tab(label='House prices', value='tab-1'),
         dcc.Tab(label='2', value='tab-2'),
     ], colors={
@@ -76,7 +81,7 @@ app.layout = html.Div([
         "primary": "Linen",
         "background": "MediumAquaMarine"
     }),
-    html.Div(id='tabs-content-props'),
+    html.Div(id='tabs-single'),
     html.Div(id='plot_dp') 
 ])
 
@@ -85,24 +90,20 @@ app.layout = html.Div([
 
 #Change content in selected tab:
 @app.callback(
-    Output('tabs-content-props', 'children'),
-    Input('tabs-styled-with-props', 'value'),    
+    Output('tabs-single', 'children'),
+    Input('tabs-global', 'value'),    
 )
 def render_content(tab):
     if tab == 'tab-1':
         return html.Div([
-            html.H3('Tab content 1'),
             table_hp,
             dropdown_plot,
             dropdown_vars
         ])
         
     elif tab == 'tab-2':
-        return html.Div([
-            html.H3('Tab content 2')
-        ])
-
-
+        return 
+        None
 
 
 
@@ -110,30 +111,27 @@ def render_content(tab):
 @app.callback(
     Output('plot_dp', 'children'),
     Input('dropdown-plots', 'value'),
-    Input('dropdown-vars','value')
+    Input('dropdown-vars','value'),
+    Input('tabs-global', 'value')
 )
-def render_plot(dp,vars):
-    if  dp=='Scatter':
-        return html.Div([
-            dcc.Graph(id="hp_scatter",
-            figure=px.scatter(hp_data, x="price", y="lotsize", color=vars)
-            )
-        ])
-    elif dp=='Histogram':
-        return html.Div([
-           dcc.Graph(id="hp_hist",figure=px.histogram(hp_data,x="price", color=vars)
-        )
-        ])
-    elif dp=='Boxplot':
-        return html.Div([
-            dcc.Graph(id="hp_boxplot",figure=px.box(hp_data,y="price", x=vars)
-        )
-        ])    
-   
-
-
-
-
+def render_plot(dp,vars,tab):
+    if tab=='tab-1':
+            if  dp=='Scatter':
+                return html.Div([
+                    dcc.Graph(id="hp_scatter",
+                    figure=px.scatter(hp_data, x="price", y="lotsize", color=vars)
+                    )
+                ])
+            elif dp=='Histogram':
+                return html.Div([
+                    dcc.Graph(id="hp_hist",figure=px.histogram(hp_data,x="price", color=vars)
+                )
+                ])
+            elif dp=='Boxplot':
+                return html.Div([
+                    dcc.Graph(id="hp_boxplot",figure=px.box(hp_data,y="price", x=vars, color=vars)
+                )
+])    
 
 
 
