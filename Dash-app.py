@@ -109,8 +109,12 @@ app.layout = html.Div([
     Input('hp-checklist', 'value')
 )
 def update_table(categ):
-    new_data=hp_data.loc[hp_data[categ[0]] == 0]
-    return new_data.to_dict("records")
+    if categ!='':
+        new_data=hp_data.loc[hp_data[categ[0]] == 0]
+        return new_data.to_dict("records")
+    else:
+        new_data=hp_data
+        return new_data.to_dict("records")
     
 
 #Change content in selected tab:
@@ -136,24 +140,25 @@ def render_content(tab):
     Output('plot_dp', 'children'),
     Input('dropdown-plots', 'value'),
     Input('dropdown-vars','value'),
-    Input('tabs-global', 'value')
+    Input('tabs-global', 'value'),
+    Input('hp-table','data')
 )
-def render_plot(dp,vars,tab):
+def render_plot(dp,vars,tab,table):
     if tab=='tab-1':
             if  dp=='Scatter':
                 return html.Div([
                     dcc.Graph(id="hp_scatter",
-                    figure=px.scatter(hp_data, x="price", y="lotsize", color=vars)
+                    figure=px.scatter(table, x="price", y="lotsize", color=vars)
                     )
                 ])
             elif dp=='Histogram':
                 return html.Div([
-                    dcc.Graph(id="hp_hist",figure=px.histogram(hp_data,x="price", color=vars)
+                    dcc.Graph(id="hp_hist",figure=px.histogram(table,x="price", color=vars)
                 )
                 ])
             elif dp=='Boxplot':
                 return html.Div([
-                    dcc.Graph(id="hp_boxplot",figure=px.box(hp_data,y="price", x=vars, color=vars)
+                    dcc.Graph(id="hp_boxplot",figure=px.box(table,y="price", x=vars, color=vars)
                 )
 ])    
 
