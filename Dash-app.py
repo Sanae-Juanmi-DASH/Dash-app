@@ -53,6 +53,27 @@ table_hp = html.Div([
      html.Br()
 ])
 
+html.Br()
+
+# Loading dataset "diabetes"
+diabetes = pd.read_csv('diabetes.csv',sep=',')
+col_diabetes = [{"name": i, "id": i} for i in diabetes.columns]
+
+
+#diabetes  table:
+table_diabetes = html.Div([
+    dt.DataTable(id="diabetes-table",
+        columns = col_diabetes,
+        data= diabetes.to_dict("records"),
+        fixed_rows={'headers': True},
+        sort_action="native",
+        sort_mode='multi',
+        style_table={'height': '300px', 'overflowY': 'auto'}
+             
+    ),
+     html.Br()
+])
+
 
 #Dropdown plots:
 fig_names=["Histogram", "Scatter", "Boxplot"]
@@ -91,7 +112,7 @@ app.layout = html.Div([
         html.H1(app.title, className= "app-header--title")]),
     dcc.Tabs(id="tabs-global", value='tab-1', children=[
         dcc.Tab(label='House prices', value='tab-1'),
-        dcc.Tab(label='2', value='tab-2'),
+        dcc.Tab(label='Diabetes', value='tab-2'),
     ], colors={
         "border": "white",
         "primary": "Linen",
@@ -133,7 +154,10 @@ def render_content(tab):
         ])
         
     elif tab == 'tab-2':
-        return None
+        return html.Div([
+            
+            table_diabetes
+        ])
 
 #Change bins:
 @app.callback(
