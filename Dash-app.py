@@ -26,11 +26,27 @@ for col in categ_cols_hp:
     hp_data[col]= hp_data[col].astype(object)
 
 
+#Checklist House prices:
+checklist_hp=html.Div([
+    dcc.Checklist(id="hp-checklist",
+    options=[
+        {'label': 'No garage', 'value': 'garage'},
+        {'label': 'No air conditioning', 'value': 'aircon'}
+       
+    ]
+),
+html.Br()
+])
+
+
 #House prices table:
 table_hp = html.Div([
-    dt.DataTable(id="hp_table",
+    dt.DataTable(id="hp-table",
         columns = hp_cols,
-        data= hp_data.loc[1:10,].to_dict("records"),
+        data= hp_data.to_dict("records"),
+        fixed_rows={'headers': True},
+        sort_action="native",
+        sort_mode='multi',
         style_table={'height': '300px', 'overflowY': 'auto'}
              
     ),
@@ -82,29 +98,37 @@ app.layout = html.Div([
         "background": "MediumAquaMarine"
     }),
     html.Div(id='tabs-single'),
-    html.Div(id='plot_dp') 
+    html.Div(id='plot_dp'),
+    html.Div(id='ckl')
 ])
 
 
-##Server:
+#Update datatable:
+@app.callback(
+    Output('hp-table', 'data'),
+    Input('hp-checklist', 'value')
+)
+def update_table(categ):
+    new_data=hp_data.loc[hp_data[categ[0]] == 0]
+    return new_data.to_dict("records")
+    
 
 #Change content in selected tab:
 @app.callback(
     Output('tabs-single', 'children'),
-    Input('tabs-global', 'value'),    
+    Input('tabs-global', 'value')
 )
 def render_content(tab):
     if tab == 'tab-1':
         return html.Div([
+            checklist_hp,
             table_hp,
             dropdown_plot,
             dropdown_vars
         ])
         
     elif tab == 'tab-2':
-        return 
-        None
-
+        return None
 
 
 #Change plot type:
