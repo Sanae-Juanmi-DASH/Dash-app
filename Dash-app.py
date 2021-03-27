@@ -99,7 +99,8 @@ app.layout = html.Div([
     }),
     html.Div(id='tabs-single'),
     html.Div(id='plot_dp'),
-    html.Div(id='ckl')
+    html.Div(id='slider'),
+    html.Div(id="n_s", style= {'display': 'none'} )
 ])
 
 
@@ -109,8 +110,8 @@ app.layout = html.Div([
     Input('hp-checklist', 'value')
 )
 def update_table(categ):
-    if categ!='':
-        new_data=hp_data.loc[hp_data[categ[0]] == 0]
+    if categ!=None:
+        new_data=hp_data.loc[hp_data[categ[0]] == 0]      
         return new_data.to_dict("records")
     else:
         new_data=hp_data
@@ -134,6 +135,15 @@ def render_content(tab):
     elif tab == 'tab-2':
         return None
 
+#Change bins:
+@app.callback(
+    Output('n_s', 'children'),
+    Input('hp-bins', 'value')
+)
+def binds (pric):
+    return pric
+
+
 
 #Change plot type:
 @app.callback(
@@ -141,9 +151,10 @@ def render_content(tab):
     Input('dropdown-plots', 'value'),
     Input('dropdown-vars','value'),
     Input('tabs-global', 'value'),
-    Input('hp-table','data')
+    Input('hp-table','data'),
+    Input('n_s','children')
 )
-def render_plot(dp,vars,tab,table):
+def render_plot(dp,vars,tab,table,pric):
     if tab=='tab-1':
             if  dp=='Scatter':
                 return html.Div([
@@ -153,8 +164,18 @@ def render_plot(dp,vars,tab,table):
                 ])
             elif dp=='Histogram':
                 return html.Div([
-                    dcc.Graph(id="hp_hist",figure=px.histogram(table,x="price", color=vars)
-                )
+                    dcc.Graph(id="hp_hist",figure=px.histogram(table,x="price", color=vars, nbins=pric)),
+                    html.P("Hitogram bins:"),
+                    dcc.Slider(id="hp-bins", min=0, max=40, value=pric, 
+                    marks=
+                    {
+                        10: {'label': '10', 'style': {'color': '#77b0b1'}},
+                        20: {'label': '20'},
+                        30: {'label': '30'},
+                        40: {'label': '40', 'style': {'color': '#f50'}}
+                    }
+                    )
+                
                 ])
             elif dp=='Boxplot':
                 return html.Div([
