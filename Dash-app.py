@@ -144,7 +144,6 @@ def binds (pric):
     return pric
 
 
-
 #Change plot type:
 @app.callback(
     Output('plot_dp', 'children'),
@@ -159,17 +158,23 @@ def render_plot(dp,vars,tab,table,pric):
             if  dp=='Scatter':
                 return html.Div([
                     dcc.Graph(id="hp_scatter",
-                    figure=px.scatter(table, x="price", y="lotsize", color=vars)
-                    )
+                    figure=px.scatter(table, x="price", y="lotsize", color=vars,custom_data=["price"])
+                    ),
+                    dt.DataTable(id="selected_data",
+                        columns = hp_cols,
+                        style_table={'height': '300px', 'overflowY': 'auto'}
+             
+    )
                 ])
             elif dp=='Histogram':
                 return html.Div([
                     dcc.Graph(id="hp_hist",figure=px.histogram(table,x="price", color=vars, nbins=pric)),
-                    html.P("Hitogram bins:"),
+                    html.P("Select the histogram bins:"),
                     dcc.Slider(id="hp-bins", min=0, max=40, value=pric, 
                     marks=
                     {
-                        10: {'label': '10', 'style': {'color': '#77b0b1'}},
+                        0: {'label': '0', 'style': {'color': '#77b0b1'}},
+                        10: {'label': '10'},
                         20: {'label': '20'},
                         30: {'label': '30'},
                         40: {'label': '40', 'style': {'color': '#f50'}}
@@ -179,11 +184,20 @@ def render_plot(dp,vars,tab,table,pric):
                 ])
             elif dp=='Boxplot':
                 return html.Div([
-                    dcc.Graph(id="hp_boxplot",figure=px.box(table,y="price", x=vars, color=vars)
+                    dcc.Graph(id="hp_boxplot",figure=px.box(table,y="price", x=vars, color=vars,notched=True)
                 )
 ])    
 
-
+#Select data with lasso:
+@app.callback(
+    Output('selected_data', 'data'),
+    Input('hp_scatter', 'selectedData'))
+def display_selected_data(selectedData):
+    if selectedData is None:
+        return None
+    prices= [i['customdata'][0] for i in selectedData['points']]
+    filter=hp_data['price'].isin(prices)
+    return hp_data[filter].to_dict("records")
 
 if __name__ == '__main__':
     app.server.run(debug=True)
