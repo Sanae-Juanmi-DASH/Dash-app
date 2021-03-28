@@ -292,7 +292,7 @@ def render_plot(dp,vars,tab,table,pric):
                         40: {'label': '40', 'style': {'color': '#f50'}}
                     }
                     )
-                
+                    
                 ])
             elif dp=='Boxplot':
                 return html.Div([
@@ -310,6 +310,9 @@ def display_selected_data(selectedData):
     prices= [i['customdata'][0] for i in selectedData['points']]
     filter=hp_data['price'].isin(prices)
     return hp_data[filter].to_dict("records")
+
+
+
 
 if __name__ == '__main__':
     app.server.run(debug=True)
