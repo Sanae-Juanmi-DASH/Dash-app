@@ -4,6 +4,7 @@ import dash
 from dash.dependencies import Input, Output, State
 import dash_html_components as html
 import dash_core_components as dcc
+import dash_bootstrap_components as dbc
 import dash_table as dt
 import pandas as pd
 import plotly.express as px
@@ -11,8 +12,14 @@ import json
 import numpy as np
 import plotly.graph_objects as go
 
+external_stylesheets = [dbc.themes.SLATE]
+
+
+
+
 #Creating app:
-app = dash.Dash(__name__, title="Dash App")
+app = dash.Dash(__name__, title="Dash App",external_stylesheets=external_stylesheets)
+
 
 #Loading dataset "House Prices":
 col_names_hp=["price","lotsize","bedrooms","bathrooms","stories","driveway","recreation","fullbase","gasheat","aircon","garage","prefer"] 
@@ -74,6 +81,18 @@ table_diabetes = html.Div([
      html.Br()
 ])
 
+#Checklist Dibetes:
+checklist_diabetes=html.Div([
+    dcc.Checklist(id="diabetes-checklist",
+    options=[
+        {'label': 'Diabetes', 'value': '1'},
+        {'label': 'No Diabetes', 'value': '0'}
+       
+    ]
+),
+html.Br()
+])
+
 
 #Dropdown plots:
 fig_names=["Histogram", "Scatter", "Boxplot"]
@@ -81,6 +100,21 @@ dropdown_plot=html.Div([
         html.Label(["Select the type of plot:",
             dcc.Dropdown(id='dropdown-plots',
                 options= [{'label': x, 'value': x} for x in fig_names],
+                value= "Histogram",
+                multi= False,
+                style={"width": "40%"}
+            )
+            
+        ]),
+        html.Br()
+            
+])
+
+#Dropdown plots diabetes:
+dropdown_plot_diabetes=html.Div([
+        html.Label(["Select the type of plot:",
+            dcc.Dropdown(id='dropdown-plots_diabetes',
+                options= [{'label': i, 'value': i} for i in fig_names],
                 value= "Histogram",
                 multi= False,
                 style={"width": "40%"}
@@ -104,6 +138,18 @@ dropdown_vars=html.Div([
             
 ])
 
+#Dropdown variables:
+dropdown_vars_diabetes=html.Div([
+        html.Label(["Select a variable:",
+            dcc.Dropdown(id='dropdown-vars-diabetes',
+                options= [{'label': i, 'value': i} for i in col_diabetes],
+                value= "Pregnacies",
+                multi= False,
+                style={"width": "40%"}
+            )
+        ])
+            
+])
 
 
 #User:
@@ -130,6 +176,7 @@ app.layout = html.Div([
     Output('hp-table', 'data'),
     Input('hp-checklist', 'value')
 )
+
 def update_table(categ):
     if categ!=None:
         new_data=hp_data.loc[hp_data[categ[0]] == 0]      
@@ -137,7 +184,22 @@ def update_table(categ):
     else:
         new_data=hp_data
         return new_data.to_dict("records")
-    
+
+
+
+#Update diabetes datatable:
+@app.callback(Output('table-diabetes', 'data'), [Input('diabetes-checklist', 'value')])
+def update_table2(value):
+    if value==1:
+        new_diabetes = diabetes[diabetes['Outcome'] == 1] 
+        return new_diabetes.todict("records")
+
+    elif value==0:
+        new_diabetes = diabetes[diabetes['Outcome'] == 0] 
+        return new_diabetes.todict("records")
+    else:
+        return table_diabetes
+
 
 #Change content in selected tab:
 @app.callback(
@@ -155,8 +217,10 @@ def render_content(tab):
         
     elif tab == 'tab-2':
         return html.Div([
-            
-            table_diabetes
+            checklist_diabetes,
+            table_diabetes,
+            dropdown_plot_diabetes,
+            dropdown_vars_diabetes
         ])
 
 #Change bins:
