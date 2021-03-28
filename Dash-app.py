@@ -8,20 +8,16 @@ import dash_table as dt
 import pandas as pd
 import plotly.express as px
 import json
+import numpy as np
 import plotly.graph_objects as go
 
 #Creating app:
 app = dash.Dash(__name__, title="Dash App")
 
-
 #Loading dataset "House Prices":
 col_names_hp=["price","lotsize","bedrooms","bathrooms","stories","driveway","recreation","fullbase","gasheat","aircon","garage","prefer"] 
 hp_data= pd.read_csv('ag-data.fil', sep="\s+", names=col_names_hp)
 hp_cols = [{"name": i, "id": i} for i in hp_data.columns]
-
-# Loading dataset "diabetes"
-diabetes = pd.read_csv('diabetes.csv',sep=',')
-col_diabetes = [{"name": i, "id": i} for i in diabetes.columns]
 
 #Data tyding house prices:
 categ_cols_hp=["bedrooms","bathrooms","stories","driveway","recreation","fullbase","gasheat","aircon","garage","prefer"] 
@@ -57,7 +53,14 @@ table_hp = html.Div([
      html.Br()
 ])
 
-#Diabetes table:
+html.Br()
+
+# Loading dataset "diabetes"
+diabetes = pd.read_csv('diabetes.csv',sep=',')
+col_diabetes = [{"name": i, "id": i} for i in diabetes.columns]
+
+
+#diabetes  table:
 table_diabetes = html.Div([
     dt.DataTable(id="diabetes-table",
         columns = col_diabetes,
@@ -70,8 +73,6 @@ table_diabetes = html.Div([
     ),
      html.Br()
 ])
-
-
 
 
 #Dropdown plots:
@@ -119,7 +120,8 @@ app.layout = html.Div([
     }),
     html.Div(id='tabs-single'),
     html.Div(id='plot_dp'),
-    html.Div(id='ckl')
+    html.Div(id='slider'),
+    html.Div(id="n_s", style= {'display': 'none'} )
 ])
 
 
@@ -129,8 +131,8 @@ app.layout = html.Div([
     Input('hp-checklist', 'value')
 )
 def update_table(categ):
-    if categ!='':
-        new_data=hp_data.loc[hp_data[categ[0]] == 0]
+    if categ!=None:
+        new_data=hp_data.loc[hp_data[categ[0]] == 0]      
         return new_data.to_dict("records")
     else:
         new_data=hp_data
@@ -153,8 +155,18 @@ def render_content(tab):
         
     elif tab == 'tab-2':
         return html.Div([
+            
             table_diabetes
-            ])
+        ])
+
+#Change bins:
+@app.callback(
+    Output('n_s', 'children'),
+    Input('hp-bins', 'value')
+)
+def binds (pric):
+    return pric
+
 
 #Change plot type:
 @app.callback(
@@ -162,28 +174,54 @@ def render_content(tab):
     Input('dropdown-plots', 'value'),
     Input('dropdown-vars','value'),
     Input('tabs-global', 'value'),
-    Input('hp-table','data')
+    Input('hp-table','data'),
+    Input('n_s','children')
 )
-def render_plot(dp,vars,tab,table):
+def render_plot(dp,vars,tab,table,pric):
     if tab=='tab-1':
             if  dp=='Scatter':
                 return html.Div([
                     dcc.Graph(id="hp_scatter",
-                    figure=px.scatter(table, x="price", y="lotsize", color=vars)
-                    )
+                    figure=px.scatter(table, x="price", y="lotsize", color=vars,custom_data=["price"])
+                    ),
+                    dt.DataTable(id="selected_data",
+                        columns = hp_cols,
+                        style_table={'height': '300px', 'overflowY': 'auto'}
+             
+    )
                 ])
             elif dp=='Histogram':
                 return html.Div([
-                    dcc.Graph(id="hp_hist",figure=px.histogram(table,x="price", color=vars)
-                )
+                    dcc.Graph(id="hp_hist",figure=px.histogram(table,x="price", color=vars, nbins=pric)),
+                    html.P("Select the histogram bins:"),
+                    dcc.Slider(id="hp-bins", min=0, max=40, value=pric, 
+                    marks=
+                    {
+                        0: {'label': '0', 'style': {'color': '#77b0b1'}},
+                        10: {'label': '10'},
+                        20: {'label': '20'},
+                        30: {'label': '30'},
+                        40: {'label': '40', 'style': {'color': '#f50'}}
+                    }
+                    )
+                
                 ])
             elif dp=='Boxplot':
                 return html.Div([
-                    dcc.Graph(id="hp_boxplot",figure=px.box(table,y="price", x=vars, color=vars)
+                    dcc.Graph(id="hp_boxplot",figure=px.box(table,y="price", x=vars, color=vars,notched=True)
                 )
 ])    
 
-
+#Select data with lasso:
+@app.callback(
+    Output('selected_data', 'data'),
+    Input('hp_scatter', 'selectedData'))
+def display_selected_data(selectedData):
+    if selectedData is None:
+        return None
+    prices= [i['customdata'][0] for i in selectedData['points']]
+    filter=hp_data['price'].isin(prices)
+    return hp_data[filter].to_dict("records")
 
 if __name__ == '__main__':
     app.server.run(debug=True)
