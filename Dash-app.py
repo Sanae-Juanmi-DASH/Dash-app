@@ -12,6 +12,7 @@ import json
 import numpy as np
 import plotly.graph_objects as go
 
+
 external_stylesheets = [dbc.themes.SOLAR]
 
 ################################# PAGE DESIGN:
@@ -41,32 +42,7 @@ CONTENT_STYLE = {
 #Main slide bar items:
 sidebar = html.Div(
     [
-        html.H2("Sidebar", className="display-4"),
-        html.Hr(),
-        html.P(
-            "A simple sidebar layout with navigation links", className="lead"
-        ),
-        dbc.Nav(
-            [
-                dbc.NavLink("Home", href="/", active="exact"),
-                dbc.NavLink("House prices dataset", href="/page-1", active="exact"),
-                dbc.NavLink("Diabetes dataset", href="/page-2", active="exact"),
-            ],
-            vertical=True,
-            pills=True,
-        ),
-    ],
-    style=SIDEBAR_STYLE,
-)
-
-content = html.Div(id="page-content", style=CONTENT_STYLE)
-
-#Server layout
-app.layout = html.Div([dcc.Location(id="url"), sidebar, content])
-
-sidebar = html.Div(
-    [
-        html.H2("Sidebar", className="display-4"),
+        html.H2("Dash App", className="display-4"),
         html.Hr(),
         html.P(
             "A simple sidebar layout with navigation links", className="lead"
@@ -117,15 +93,11 @@ idx = 0
 new_col = hp_data.index + 1
 hp_data.insert(loc=idx, column='ID', value=new_col)
 
-# Loading dataset "diabetes"
-diabetes = pd.read_csv('diabetes2.csv',sep=',')
-col_diabetes = [{"name": i, "id": i} for i in diabetes.columns]
 
 #####Diabtes:
 # Loading dataset "diabetes"
 diabetes = pd.read_csv('diabetes2.csv',sep=',')
 col_diabetes = [{"name": i, "id": i} for i in diabetes.columns]
-
 
 
 
@@ -464,7 +436,7 @@ def display_sele_data(click):
     Output('tabs-single-d', 'children'),
     Input('tabs-global-d', 'value')
 )
-def render_content(tab):
+def render_content2(tab):
     if tab == 'tab-1-d':
         return html.Div([
             checklist_diabetes,
