@@ -1,3 +1,12 @@
+# Statistics for Data Science 
+## Data Tyding and Reporting 
+## 2021
+### Sanae Amzigh Ben Moussa 100365319
+### Juan Miguel Rodríguez Lago 100351855
+
+
+
+
 # Dash-app
 
 In this Dash app, two data sets are used to perform descriptive statistics, interactive and dynamic graphics and statistical models.
