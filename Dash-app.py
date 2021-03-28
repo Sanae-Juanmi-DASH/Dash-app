@@ -97,7 +97,13 @@ hp_data.insert(loc=idx, column='ID', value=new_col)
 #####Diabtes:
 # Loading dataset "diabetes"
 diabetes = pd.read_csv('diabetes2.csv',sep=',')
+del diabetes['Outcome']
 col_diabetes = [{"name": i, "id": i} for i in diabetes.columns]
+diabetes = pd.read_csv('diabetes2.csv',sep=',')
+diabetes=diabetes.dropna()
+col_full_diabetes=[{"name": i, "id": i} for i in diabetes.columns]
+col_diab=["Pregnancies","Glucose","BloodPressure","SkinThickness","Insulin","BMI","DiabetesPedigreeFunction","Age"]
+
 
 
 
@@ -180,7 +186,7 @@ dropdown_vars=html.Div([
 #diabetes  table:
 table_diabetes = html.Div([
     dt.DataTable(id="diabetes-table",
-        columns = col_diabetes,
+        columns = col_full_diabetes,
         data= diabetes.to_dict("records"),
         fixed_rows={'headers': True},
         sort_action="native",
@@ -215,16 +221,17 @@ html.Br()
 
 
 #Dropdown plots diabetes:
+fig_names2=["Histogram", "Boxplot"]
 dropdown_plot_diabetes=html.Div([
         html.Br(),
         html.H4('Dynamic Plots'),
         html.Br(),
         html.Label(["Select the type of plot:",
-            dcc.Dropdown(id='dropdown-plots_diabetes',
-                options= [{'label': i, 'value': i} for i in fig_names],
+            dcc.Dropdown(id='dropdown-plots-diabetes',
+                options= [{'label': i, 'value': i} for i in fig_names2],
                 value= "Histogram",
                 multi= False,
-                style={"width": "100%"}
+                style={"width": "120%"}
             )
             
         ]),
@@ -237,16 +244,14 @@ dropdown_plot_diabetes=html.Div([
 dropdown_vars_diabetes=html.Div([
         html.Label(["Select a variable:",
             dcc.Dropdown(id='dropdown-vars-diabetes',
-                options= [{'label': i, 'value': i} for i in col_diabetes],
-                value= "Pregnacies",
+                options= [{'label': i, 'value': i} for i in col_diab],
+                value= "Pregnancies",
                 multi= False,
-                style={"width": "100%"}
+                style={"width": "140%"}
             )
         ])
             
 ])
-
-
 
 
 
@@ -366,14 +371,14 @@ def render_page_content(pathname):
     elif pathname == "/page-1":
         return html.Div([
                 html.Div([
-                    html.H1(app.title, className= "app-header--title")]),
+                    html.H1( className= "app-header--title")]),
                 dcc.Tabs(id="tabs-global-hp", value='tab-1-hp', children=[
                     dcc.Tab(label='Descriptive Analysis', value='tab-1-hp'),
                     dcc.Tab(label='Model prediction', value='tab-2-hp'),
                 ], colors={
                     "border": "white",
                     "primary": "Linen",
-                    "background": "MediumAquaMarine"
+                    "background": 'rgb(136, 170, 184)'
                 }),
                 html.Div(id='tabs-single-hp'),
                 html.Div(id='plot-dp-hp'),
@@ -385,14 +390,14 @@ def render_page_content(pathname):
     elif pathname == "/page-2":
         return html.Div([
                 html.Div([
-                    html.H1(app.title, className= "app-header--title")]),
+                    html.H1( className= "app-header--title")]),
                 dcc.Tabs(id="tabs-global-d", value='tab-1-d', children=[
                     dcc.Tab(label='Descriptive Analysis', value='tab-1-d'),
                     dcc.Tab(label='Model prediction', value='tab-2-d'),
                 ], colors={
                     "border": "white",
                     "primary": "Linen",
-                    "background": "MediumAquaMarine"
+                    "background": 'rgb(136, 170, 184)'
                 }),
                 html.Div(id='tabs-single-d'),
                 html.Div(id='plot-dp-d'),
@@ -537,6 +542,22 @@ def display_sele_data(click):
 
 
 ###Diabtes:
+
+
+#Update datatable:
+@app.callback(
+    Output('diabetes-table', 'data'),
+    Input('diabetes-checklist', 'value')
+)
+
+def update_table2(diab):
+    if diab!=None:
+        new_dat=diabetes[diabetes['Outcome'].str.contains('0')]  
+        return new_dat.to_dict("records")
+
+    elif diab==None:
+        return diabetes
+
 #Change content in selected tab:
 @app.callback(
     Output('tabs-single-d', 'children'),
@@ -553,6 +574,81 @@ def render_content2(tab):
         
     elif tab == 'tab-2-d':
         return None
+
+#Change bins:
+@app.callback(
+    Output('ns-d', 'children'),
+    Input('hp-bins', 'value')
+)
+def binds_2 (nbinss):
+    return nbinss
+
+#Change plot type:
+@app.callback(
+    Output('plot-dp-d', 'children'),
+    Input('dropdown-plots-diabetes', 'value'),
+    Input('dropdown-vars-diabetes','value'),
+    Input('tabs-global-d', 'value'),
+    Input('diabetes-table','data'),
+    Input('ns-d','children')
+)
+def render_plot2(dp,vars,tab,table,nbinss):
+    if tab=='tab-1-d': 
+            if dp=='Histogram':
+                return html.Div([
+                    dcc.Graph(id="d-hist",figure=px.histogram(table,x=vars, color="Outcome", nbins=nbinss)),
+                    html.P("Select the histogram bins:"),
+                    dcc.Slider(id="d-bins", min=0, max=40, value=nbinss, 
+                    marks=
+                    {
+                        0: {'label': '0', 'style': {'color': '#77b0b1'}},
+                        10: {'label': '10'},
+                        20: {'label': '20'},
+                        30: {'label': '30'},
+                        40: {'label': '40', 'style': {'color': '#f50'}}
+                    }
+                    )
+                    
+                ])
+            elif dp=='Boxplot':
+                return html.Div([
+                    dcc.Graph(id="d-boxplot",figure=px.box(table, x=vars, color="Outcome", points="all",custom_data=["DiabetesPedigreeFunction"])
+                    ),
+                    dt.DataTable(id="selected_points2",
+                        columns = col_diabetes,
+                        style_table={'height': '300px', 'overflowY': 'auto'},
+                        style_header={'backgroundColor': 'rgb(11, 65, 86)'},
+                        style_cell={
+                            'backgroundColor': 'rgb(106, 146, 162)',
+                            'color': 'white'
+                        },
+             
+    )
+                
+])    
+
+#Select data with boxplots:
+@app.callback(
+    Output('selected_points2', 'data'),
+    Input('d-boxplot', 'selectedData'))
+def display_sele_data2(relay):
+    if relay is None:
+        return None
+    dpf= [i['customdata'][0] for i in relay['points']]
+    filter2=diabetes['DiabetesPedigreeFunction'].isin(dpf)
+    return diabetes[filter2].to_dict("records")
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 if __name__ == '__main__':
