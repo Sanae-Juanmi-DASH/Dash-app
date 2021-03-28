@@ -80,7 +80,7 @@ table_hp = html.Div([
 html.Br()
 
 # Loading dataset "diabetes"
-diabetes = pd.read_csv('diabetes.csv',sep=',')
+diabetes = pd.read_csv('diabetes2.csv',sep=',')
 col_diabetes = [{"name": i, "id": i} for i in diabetes.columns]
 
 
@@ -313,11 +313,22 @@ def render_plot(dp,vars,tab,table,pric):
                 ])
             elif dp=='Boxplot':
                 return html.Div([
-                    dcc.Graph(id="hp_boxplot",figure=px.box(table,y="price", x=vars, color=vars,notched=True)
-                )
+                    dcc.Graph(id="hp_boxplot",figure=px.box(table,y="price", x=vars, color=vars,notched=True,points="all",custom_data=["ID"])
+                    ),
+                    dt.DataTable(id="selected_points",
+                        columns = hp_cols,
+                        style_table={'height': '300px', 'overflowY': 'auto'},
+                        style_header={'backgroundColor': 'rgb(11, 65, 86)'},
+                        style_cell={
+                            'backgroundColor': 'rgb(106, 146, 162)',
+                            'color': 'white'
+                        },
+             
+    )
+                
 ])    
 
-#Select data with lasso:
+#Select data with lasso scatterplot:
 @app.callback(
     Output('selected_data', 'data'),
     Input('hp_scatter', 'selectedData'))
@@ -327,6 +338,18 @@ def display_selected_data(selectedData):
     prices= [i['customdata'][0] for i in selectedData['points']]
     filter=hp_data['ID'].isin(prices)
     return hp_data[filter].to_dict("records")
+
+#Select data with boxplots:
+@app.callback(
+    Output('selected_points', 'data'),
+    Input('hp_boxplot', 'clickData'))
+def display_sele_data(click):
+    if click is None:
+        return None
+    prices= [i['customdata'][0] for i in click['points']]
+    filter=hp_data['ID'].isin(prices)
+    return hp_data[filter].to_dict("records")
+
 
 
 
