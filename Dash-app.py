@@ -1,5 +1,4 @@
 
-
 #Loading libraries:
 import dash
 from dash.dependencies import Input, Output, State
@@ -257,7 +256,44 @@ dropdown_vars_diabetes=html.Div([
 @app.callback(Output("page-content", "children"), [Input("url", "pathname")])
 def render_page_content(pathname):
     if pathname == "/":
-        return html.P("This is the content of the home page!")
+        return html.Div([
+            html.H1("Brief Introduction"),
+            html.Br(),
+            html.Br(),
+            html.H2("House Prices Data Set"),
+            html.Br(),
+            html.H2("Diabetes Data Set"),
+            html.Br(),
+            html.H4("Context"),
+            html.P("This dataset is originally from the National Institute of Diabetes and Digestive and Kidney Diseases."),
+            html.P("The objective is to predict based on diagnostic measurements whether a patient has diabetes."),
+            html.Br(),
+            html.H4("Content"),
+            html.P("Several constraints were placed on the selection of these instances from a larger database."),
+            html.P("In particular, all patients here are females at least 21 years old of Pima Indian heritage."),
+            dcc.Markdown('''
+
+            **- Pregnancies:** Number of times pregnant.
+            
+            **- Glucose:** Plasma glucose concentration a 2 hours in an oral glucose tolerance test.
+            
+            **- BloodPressure:** Diastolic blood pressure (mm Hg).
+            
+            **- SkinThickness:** Triceps skin fold thickness (mm)
+            
+            **- Insulin:** 2-Hour serum insulin (mu U/ml).
+            
+            **- BMI:** Body mass index (weight in kg/(height in m)^2).
+            
+            **- DiabetesPedigreeFunction:** Diabetes pedigree function.
+            
+            **-  Age:** Age (years).
+
+            **- Outcome:** Class variable (0 or 1).
+            ''')
+            
+
+        ])
     elif pathname == "/page-1":
         return html.Div([
                 html.Div([
