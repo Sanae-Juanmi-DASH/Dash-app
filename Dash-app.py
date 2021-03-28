@@ -12,10 +12,7 @@ import json
 import numpy as np
 import plotly.graph_objects as go
 
-external_stylesheets = [dbc.themes.SLATE]
-
-
-
+external_stylesheets = [dbc.themes.SOLAR]
 
 #Creating app:
 app = dash.Dash(__name__, title="Dash App",external_stylesheets=external_stylesheets)
@@ -54,7 +51,12 @@ table_hp = html.Div([
         fixed_rows={'headers': True},
         sort_action="native",
         sort_mode='multi',
-        style_table={'height': '300px', 'overflowY': 'auto'}
+        style_table={'height': '300px', 'overflowY': 'auto'},
+        style_header={'backgroundColor': 'rgb(11, 65, 86)'},
+        style_cell={
+            'backgroundColor': 'rgb(106, 146, 162)',
+            'color': 'white'
+        },
              
     ),
      html.Br()
@@ -75,7 +77,12 @@ table_diabetes = html.Div([
         fixed_rows={'headers': True},
         sort_action="native",
         sort_mode='multi',
-        style_table={'height': '300px', 'overflowY': 'auto'}
+        style_table={'height': '300px', 'overflowY': 'auto'},
+        style_header={'backgroundColor': 'rgb(11, 65, 86)'},
+        style_cell={
+            'backgroundColor': 'rgb(106, 146, 162)',
+            'color': 'white'
+        },
              
     ),
      html.Br()
@@ -160,7 +167,7 @@ app.layout = html.Div([
         dcc.Tab(label='House prices', value='tab-1'),
         dcc.Tab(label='Diabetes', value='tab-2'),
     ], colors={
-        "border": "white",
+        "border": "rgb(11, 65, 86)",
         "primary": "Linen",
         "background": "MediumAquaMarine"
     }),
