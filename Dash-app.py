@@ -64,7 +64,9 @@ table_hp = html.Div([
         },
              
     ),
+     html.Br(),
      html.Br()
+
 ])
 
 html.Br()
