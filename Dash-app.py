@@ -204,7 +204,7 @@ df_columns=['Actual','Predicted']
 coef_hp = html.Div([
     dt.DataTable(id="coef-hp-table",
         columns = df_columns,
-        data= df,
+        data= df.to_dict("records"),
         fixed_rows={'headers': True},
         sort_action="native",
         sort_mode='multi',
@@ -486,7 +486,10 @@ def render_content(tab):
         ])
         
     elif tab == 'tab-2-hp':
-        return None
+        return html.Div([
+            
+            
+        ])
 
 
 #Update datatable:
