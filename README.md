@@ -4,7 +4,7 @@
 ### Sanae Amzigh Ben Moussa 100365319
 ### Juan Miguel Rodríguez Lago 100351855
 
-#### https://https://github.com/Sanae-Juanmi-DASH/Dash-app
+#### https://github.com/Sanae-Juanmi-DASH/Dash-app
 
 
 
