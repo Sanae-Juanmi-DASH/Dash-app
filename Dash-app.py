@@ -50,7 +50,7 @@ sidebar = html.Div(
         html.H2("Dash App", className="display-4"),
         html.Hr(),
         html.P(
-            "A simple sidebar layout with navigation links", className="lead"
+            "A simple classification and regression App", className="lead"
         ),
         dbc.Nav(
             [
@@ -108,6 +108,9 @@ diabetes = pd.read_csv('diabetes2.csv',sep=',')
 diabetes=diabetes.dropna()
 col_full_diabetes=[{"name": i, "id": i} for i in diabetes.columns]
 col_diab=["Pregnancies","Glucose","BloodPressure","SkinThickness","Insulin","BMI","DiabetesPedigreeFunction","Age"]
+cols_float=["BMI","DiabetesPedigreeFunction"]
+for col in cols_float:
+    diabetes[col]= diabetes[col].map(int)
 
 
 
@@ -557,6 +560,8 @@ def render_plot(dp,vars,tab,table,pric):
                 ])
             elif dp=='Boxplot':
                 return html.Div([
+                     html.Br(),
+                     html.P('Note that you can click in the data points to see more information'),
                     dcc.Graph(id="hp_boxplot",figure=px.box(table,y="price", x=vars, color=vars,notched=True,points="all",custom_data=["ID"])
                     ),
                     dt.DataTable(id="selected_points",
@@ -606,7 +611,7 @@ def display_sele_data(click):
 
 def update_table2(diab):
     if diab!=None:
-        new_dat=diabetes[diabetes['Outcome'].str.contains('0')]  
+        new_dat=diabetes[diabetes['Outcome']==0]    
         return new_dat.to_dict("records")
 
     elif diab==None:
@@ -632,7 +637,7 @@ def render_content2(tab):
 #Change bins:
 @app.callback(
     Output('ns-d', 'children'),
-    Input('hp-bins', 'value')
+    Input('d-bins', 'value')
 )
 def binds_2 (nbinss):
     return nbinss
