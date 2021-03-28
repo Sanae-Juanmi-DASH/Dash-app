@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 
 #Loading libraries:
 import dash
