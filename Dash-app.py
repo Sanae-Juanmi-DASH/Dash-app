@@ -32,12 +32,17 @@ for col in categ_cols_hp:
 
 #Checklist House prices:
 checklist_hp=html.Div([
+    html.Br(),
+    html.H4('House Prices Data table'),
+    html.Br(),
+    html.H5('Filters'),
     dcc.Checklist(id="hp-checklist",
     options=[
         {'label': 'No garage', 'value': 'garage'},
         {'label': 'No air conditioning', 'value': 'aircon'}
        
-    ]
+    ],
+    labelStyle = dict(display='block')
 ),
 html.Br()
 ])
@@ -90,12 +95,17 @@ table_diabetes = html.Div([
 
 #Checklist Dibetes:
 checklist_diabetes=html.Div([
+    html.Br(),
+    html.H4('Diabetes Data table'),
+    html.Br(),
+    html.H5('Filters'),
     dcc.Checklist(id="diabetes-checklist",
     options=[
         {'label': 'Diabetes', 'value': '1'},
         {'label': 'No Diabetes', 'value': '0'}
        
-    ]
+    ],
+    labelStyle = dict(display='block')
 ),
 html.Br()
 ])
@@ -104,12 +114,14 @@ html.Br()
 #Dropdown plots:
 fig_names=["Histogram", "Scatter", "Boxplot"]
 dropdown_plot=html.Div([
+        html.Br(),
+        html.H4('Dynamic Plots'),
         html.Label(["Select the type of plot:",
             dcc.Dropdown(id='dropdown-plots',
                 options= [{'label': x, 'value': x} for x in fig_names],
                 value= "Histogram",
                 multi= False,
-                style={"width": "40%"}
+                style={"width": "100%"}
             )
             
         ]),
@@ -119,12 +131,15 @@ dropdown_plot=html.Div([
 
 #Dropdown plots diabetes:
 dropdown_plot_diabetes=html.Div([
+        html.Br(),
+        html.H4('Dynamic Plots'),
+        html.Br(),
         html.Label(["Select the type of plot:",
             dcc.Dropdown(id='dropdown-plots_diabetes',
                 options= [{'label': i, 'value': i} for i in fig_names],
                 value= "Histogram",
                 multi= False,
-                style={"width": "40%"}
+                style={"width": "100%"}
             )
             
         ]),
@@ -139,7 +154,7 @@ dropdown_vars=html.Div([
                 options= [{'label': x, 'value': x} for x in categ_cols_hp],
                 value= "garage",
                 multi= False,
-                style={"width": "40%"}
+                style={"width": "100%"}
             )
         ])
             
@@ -152,7 +167,7 @@ dropdown_vars_diabetes=html.Div([
                 options= [{'label': i, 'value': i} for i in col_diabetes],
                 value= "Pregnacies",
                 multi= False,
-                style={"width": "40%"}
+                style={"width": "100%"}
             )
         ])
             
@@ -167,7 +182,7 @@ app.layout = html.Div([
         dcc.Tab(label='House prices', value='tab-1'),
         dcc.Tab(label='Diabetes', value='tab-2'),
     ], colors={
-        "border": "rgb(11, 65, 86)",
+        "border": "white",
         "primary": "Linen",
         "background": "MediumAquaMarine"
     }),
