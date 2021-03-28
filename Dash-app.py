@@ -23,11 +23,19 @@ col_names_hp=["price","lotsize","bedrooms","bathrooms","stories","driveway","rec
 hp_data= pd.read_csv('ag-data.fil', sep="\s+", names=col_names_hp)
 hp_cols = [{"name": i, "id": i} for i in hp_data.columns]
 
-#Data tyding house prices:
+##Data tyding house prices:
 categ_cols_hp=["bedrooms","bathrooms","stories","driveway","recreation","fullbase","gasheat","aircon","garage","prefer"] 
 for col in categ_cols_hp:
     hp_data[col]= hp_data[col].map(int)
     hp_data[col]= hp_data[col].astype(object)
+
+#New column to identif rows:
+idx = 0
+new_col = hp_data.index + 1
+hp_data.insert(loc=idx, column='ID', value=new_col)
+
+
+
 
 
 #Checklist House prices:
@@ -64,8 +72,8 @@ table_hp = html.Div([
         },
              
     ),
-     html.Br(),
      html.Br()
+    
 
 ])
 
@@ -274,7 +282,7 @@ def render_plot(dp,vars,tab,table,pric):
                     html.Br(),
                     html.P('Note that you can select points by clicking on the Lasso Select filter that appears on the top bar of the graph. Once the points are selected, the selected data will appear in the table below.'),
                     dcc.Graph(id="hp_scatter",
-                    figure=px.scatter(table, x="price", y="lotsize", color=vars,custom_data=["price"])
+                    figure=px.scatter(table, x="price", y="lotsize", color=vars,custom_data=["ID"])
                     ),
                     dt.DataTable(id="selected_data",
                         columns = hp_cols,
@@ -317,7 +325,7 @@ def display_selected_data(selectedData):
     if selectedData is None:
         return None
     prices= [i['customdata'][0] for i in selectedData['points']]
-    filter=hp_data['price'].isin(prices)
+    filter=hp_data['ID'].isin(prices)
     return hp_data[filter].to_dict("records")
 
 
