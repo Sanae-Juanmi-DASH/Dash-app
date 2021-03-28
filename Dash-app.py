@@ -210,7 +210,9 @@ def update_table(categ):
 
 
 #Update diabetes datatable:
-@app.callback(Output('table-diabetes', 'data'), [Input('diabetes-checklist', 'value')])
+@app.callback(
+    Output('table-diabetes', 'data'), 
+    Input('diabetes-checklist', 'value'))
 def update_table2(value):
     if value==1:
         new_diabetes = diabetes[diabetes['Outcome'] == 1] 
