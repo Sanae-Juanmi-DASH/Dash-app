@@ -11,6 +11,11 @@ import plotly.express as px
 import json
 import numpy as np
 import plotly.graph_objects as go
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn import metrics
+from sklearn.linear_model import LogisticRegression
+
 
 
 external_stylesheets = [dbc.themes.SOLAR]
@@ -181,6 +186,42 @@ dropdown_vars=html.Div([
             
 ])
 
+
+#Model House prices:
+X = hp_data.iloc[:, :-1].values
+y = hp_data.iloc[:, 1].values
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
+regressor = LinearRegression()
+regressor.fit(X_train, y_train)
+coeff_df = pd.DataFrame(regressor.coef_,columns=['Coefficient'])
+y_pred = regressor.predict(X_test)
+df = pd.DataFrame({'Actual': y_test, 'Predicted': y_pred})
+df_columns=['Actual','Predicted']
+
+coef_hp = html.Div([
+    dt.DataTable(id="coef-hp-table",
+        columns = df_columns,
+        data= df,
+        fixed_rows={'headers': True},
+        sort_action="native",
+        sort_mode='multi',
+        style_table={'height': '300px', 'overflowY': 'auto'},
+        style_header={'backgroundColor': 'rgb(11, 65, 86)'},
+        style_cell={
+            'backgroundColor': 'rgb(106, 146, 162)',
+            'color': 'white'
+        },
+             
+    ),
+     html.Br()
+    
+
+])
+
+html.Br()
+
+
+
 #####Diabetes:
 
 #diabetes  table:
@@ -252,6 +293,18 @@ dropdown_vars_diabetes=html.Div([
         ])
             
 ])
+
+
+#Logistic model diabetes:
+X= diabetes.iloc[:,:-8].values
+y=diabetes.iloc[:,8].values
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
+logreg = LogisticRegression()
+logreg.fit(X_train, y_train)
+y_pred=logreg.predict(X_test)
+score = logreg.score(X_test, y_test)
+cm = metrics.confusion_matrix(y_test, y_pred)
+
 
 
 
@@ -374,13 +427,14 @@ def render_page_content(pathname):
                     html.H1( className= "app-header--title")]),
                 dcc.Tabs(id="tabs-global-hp", value='tab-1-hp', children=[
                     dcc.Tab(label='Descriptive Analysis', value='tab-1-hp'),
-                    dcc.Tab(label='Model prediction', value='tab-2-hp'),
+                    dcc.Tab(label='Model prediction', value='tab-2-hp')
                 ], colors={
                     "border": "white",
                     "primary": "Linen",
                     "background": 'rgb(136, 170, 184)'
                 }),
                 html.Div(id='tabs-single-hp'),
+                html.Div(id='tabs-single2-hp'),
                 html.Div(id='plot-dp-hp'),
                 html.Div(id='slider-hp'),
                 html.Div(id="ns-hp", style= {'display': 'none'} )
@@ -541,7 +595,7 @@ def display_sele_data(click):
     return hp_data[filter].to_dict("records")
 
 
-###Diabtes:
+###Diabetes:
 
 
 #Update datatable:
