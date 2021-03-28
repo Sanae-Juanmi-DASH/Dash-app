@@ -14,16 +14,99 @@ import plotly.graph_objects as go
 
 external_stylesheets = [dbc.themes.SOLAR]
 
+################################# PAGE DESIGN:
+
+
 #Creating app:
 app = dash.Dash(__name__, title="Dash App",external_stylesheets=external_stylesheets)
 
+# the style arguments for the sidebar
+SIDEBAR_STYLE = {
+    "position": "fixed",
+    "top": 0,
+    "left": 0,
+    "bottom": 0,
+    "width": "16rem",
+    "padding": "2rem 1rem",
+    "background-color": "#f8f9fa",
+}
 
+# content page style:
+CONTENT_STYLE = {
+    "margin-left": "18rem",
+    "margin-right": "2rem",
+    "padding": "2rem 1rem",
+}
+
+#Main slide bar items:
+sidebar = html.Div(
+    [
+        html.H2("Sidebar", className="display-4"),
+        html.Hr(),
+        html.P(
+            "A simple sidebar layout with navigation links", className="lead"
+        ),
+        dbc.Nav(
+            [
+                dbc.NavLink("Home", href="/", active="exact"),
+                dbc.NavLink("House prices dataset", href="/page-1", active="exact"),
+                dbc.NavLink("Diabetes dataset", href="/page-2", active="exact"),
+            ],
+            vertical=True,
+            pills=True,
+        ),
+    ],
+    style=SIDEBAR_STYLE,
+)
+
+content = html.Div(id="page-content", style=CONTENT_STYLE)
+
+#Server layout
+app.layout = html.Div([dcc.Location(id="url"), sidebar, content])
+
+sidebar = html.Div(
+    [
+        html.H2("Sidebar", className="display-4"),
+        html.Hr(),
+        html.P(
+            "A simple sidebar layout with navigation links", className="lead"
+        ),
+        dbc.Nav(
+            [
+                dbc.NavLink("Home", href="/", active="exact"),
+                dbc.NavLink("House prices dataset", href="/page-1", active="exact"),
+                dbc.NavLink("Diabetes dataset", href="/page-2", active="exact"),
+            ],
+            vertical=True,
+            pills=True,
+        ),
+    ],
+    style=SIDEBAR_STYLE,
+)
+
+content = html.Div(id="page-content", style=CONTENT_STYLE)
+app.layout = html.Div([dcc.Location(id="url"), sidebar, content])
+
+#Creating sidebar_style:
+Sidebar_style= {
+    "position": "fixed",
+    "top": 0,
+    "left": 0,
+    "bottom": 0,
+    "width": "16rem",
+    "padding": "2rem 1rem",
+    "background-color": "#f8f9fa",
+}
+
+################################# DATA MANIPULATION:
+
+#####House prices:
 #Loading dataset "House Prices":
 col_names_hp=["price","lotsize","bedrooms","bathrooms","stories","driveway","recreation","fullbase","gasheat","aircon","garage","prefer"] 
 hp_data= pd.read_csv('ag-data.fil', sep="\s+", names=col_names_hp)
 hp_cols = [{"name": i, "id": i} for i in hp_data.columns]
 
-##Data tyding house prices:
+#Data tyding house prices:
 categ_cols_hp=["bedrooms","bathrooms","stories","driveway","recreation","fullbase","gasheat","aircon","garage","prefer"] 
 for col in categ_cols_hp:
     hp_data[col]= hp_data[col].map(int)
@@ -34,28 +117,21 @@ idx = 0
 new_col = hp_data.index + 1
 hp_data.insert(loc=idx, column='ID', value=new_col)
 
+# Loading dataset "diabetes"
+diabetes = pd.read_csv('diabetes2.csv',sep=',')
+col_diabetes = [{"name": i, "id": i} for i in diabetes.columns]
+
+#####Diabtes:
+# Loading dataset "diabetes"
+diabetes = pd.read_csv('diabetes2.csv',sep=',')
+col_diabetes = [{"name": i, "id": i} for i in diabetes.columns]
 
 
 
 
-#Checklist House prices:
-checklist_hp=html.Div([
-    html.Br(),
-    html.H4('House Prices Data table'),
-    html.Br(),
-    html.H5('Filters'),
-    dcc.Checklist(id="hp-checklist",
-    options=[
-        {'label': 'No garage', 'value': 'garage'},
-        {'label': 'No air conditioning', 'value': 'aircon'}
-       
-    ],
-    labelStyle = dict(display='block')
-),
-html.Br()
-])
+################################# USER:
 
-
+#####House prices:
 #House prices table:
 table_hp = html.Div([
     dt.DataTable(id="hp-table",
@@ -79,10 +155,55 @@ table_hp = html.Div([
 
 html.Br()
 
-# Loading dataset "diabetes"
-diabetes = pd.read_csv('diabetes2.csv',sep=',')
-col_diabetes = [{"name": i, "id": i} for i in diabetes.columns]
+#Checklist House prices:
+checklist_hp=html.Div([
+    html.Br(),
+    html.H4('House Prices Data table'),
+    html.Br(),
+    html.H5('Filters'),
+    dcc.Checklist(id="hp-checklist",
+    options=[
+        {'label': 'No garage', 'value': 'garage'},
+        {'label': 'No air conditioning', 'value': 'aircon'}
+       
+    ],
+    labelStyle = dict(display='block')
+),
+html.Br()
+])
 
+#Dropdown plots:
+fig_names=["Histogram", "Scatter", "Boxplot"]
+dropdown_plot=html.Div([
+        html.Br(),
+        html.H4('Dynamic Plots'),
+        html.Label(["Select the type of plot:",
+            dcc.Dropdown(id='dropdown-plots',
+                options= [{'label': x, 'value': x} for x in fig_names],
+                value= "Histogram",
+                multi= False,
+                style={"width": "100%"}
+            )
+            
+        ]),
+        html.Br()
+            
+])
+
+#Dropdown variables:
+dropdown_vars=html.Div([
+        html.Label(["Select a grouping variable:",
+            dcc.Dropdown(id='dropdown-vars',
+                options= [{'label': x, 'value': x} for x in categ_cols_hp],
+                value= "garage",
+                multi= False,
+                style={"width": "100%"}
+            )
+        ])
+            
+])
+
+#####Diabetes:
 
 #diabetes  table:
 table_diabetes = html.Div([
@@ -121,24 +242,6 @@ html.Br()
 ])
 
 
-#Dropdown plots:
-fig_names=["Histogram", "Scatter", "Boxplot"]
-dropdown_plot=html.Div([
-        html.Br(),
-        html.H4('Dynamic Plots'),
-        html.Label(["Select the type of plot:",
-            dcc.Dropdown(id='dropdown-plots',
-                options= [{'label': x, 'value': x} for x in fig_names],
-                value= "Histogram",
-                multi= False,
-                style={"width": "100%"}
-            )
-            
-        ]),
-        html.Br()
-            
-])
-
 #Dropdown plots diabetes:
 dropdown_plot_diabetes=html.Div([
         html.Br(),
@@ -157,18 +260,6 @@ dropdown_plot_diabetes=html.Div([
             
 ])
 
-#Dropdown variables:
-dropdown_vars=html.Div([
-        html.Label(["Select a grouping variable:",
-            dcc.Dropdown(id='dropdown-vars',
-                options= [{'label': x, 'value': x} for x in categ_cols_hp],
-                value= "garage",
-                multi= False,
-                style={"width": "100%"}
-            )
-        ])
-            
-])
 
 #Dropdown variables:
 dropdown_vars_diabetes=html.Div([
@@ -184,23 +275,78 @@ dropdown_vars_diabetes=html.Div([
 ])
 
 
-#User:
-app.layout = html.Div([
-    html.Div([
-        html.H1(app.title, className= "app-header--title")]),
-    dcc.Tabs(id="tabs-global", value='tab-1', children=[
-        dcc.Tab(label='House prices', value='tab-1'),
-        dcc.Tab(label='Diabetes', value='tab-2'),
-    ], colors={
-        "border": "white",
-        "primary": "Linen",
-        "background": "MediumAquaMarine"
-    }),
-    html.Div(id='tabs-single'),
-    html.Div(id='plot_dp'),
-    html.Div(id='slider'),
-    html.Div(id="n_s", style= {'display': 'none'} )
-])
+
+
+
+
+################################# SERVER:
+
+@app.callback(Output("page-content", "children"), [Input("url", "pathname")])
+def render_page_content(pathname):
+    if pathname == "/":
+        return html.P("This is the content of the home page!")
+    elif pathname == "/page-1":
+        return html.Div([
+                html.Div([
+                    html.H1(app.title, className= "app-header--title")]),
+                dcc.Tabs(id="tabs-global-hp", value='tab-1-hp', children=[
+                    dcc.Tab(label='Descriptive Analysis', value='tab-1-hp'),
+                    dcc.Tab(label='Model prediction', value='tab-2-hp'),
+                ], colors={
+                    "border": "white",
+                    "primary": "Linen",
+                    "background": "MediumAquaMarine"
+                }),
+                html.Div(id='tabs-single-hp'),
+                html.Div(id='plot-dp-hp'),
+                html.Div(id='slider-hp'),
+                html.Div(id="ns-hp", style= {'display': 'none'} )
+            ])
+                
+                
+    elif pathname == "/page-2":
+        return html.Div([
+                html.Div([
+                    html.H1(app.title, className= "app-header--title")]),
+                dcc.Tabs(id="tabs-global-d", value='tab-1-d', children=[
+                    dcc.Tab(label='Descriptive Analysis', value='tab-1-d'),
+                    dcc.Tab(label='Model prediction', value='tab-2-d'),
+                ], colors={
+                    "border": "white",
+                    "primary": "Linen",
+                    "background": "MediumAquaMarine"
+                }),
+                html.Div(id='tabs-single-d'),
+                html.Div(id='plot-dp-d'),
+                html.Div(id='slider-d'),
+                html.Div(id="ns-d", style= {'display': 'none'} )
+            ])
+                
+    return dbc.Jumbotron(
+        [
+            html.H1("404: Not found", className="text-danger"),
+            html.Hr(),
+            html.P(f"The pathname {pathname} was not recognised..."),
+        ]
+    )
+
+
+#Change content in selected tab:
+@app.callback(
+    Output('tabs-single-hp', 'children'),
+    Input('tabs-global-hp', 'value')
+)
+def render_content(tab):
+    if tab == 'tab-1-hp':
+        return html.Div([
+            checklist_hp,
+            table_hp,
+            dropdown_plot,
+            dropdown_vars
+        ])
+        
+    elif tab == 'tab-2-hp':
+        return None
 
 
 #Update datatable:
@@ -218,48 +364,9 @@ def update_table(categ):
         return new_data.to_dict("records")
 
 
-
-#Update diabetes datatable:
-@app.callback(
-    Output('table-diabetes', 'data'), 
-    Input('diabetes-checklist', 'value'))
-def update_table2(value):
-    if value==1:
-        new_diabetes = diabetes[diabetes['Outcome'] == 1] 
-        return new_diabetes.todict("records")
-
-    elif value==0:
-        new_diabetes = diabetes[diabetes['Outcome'] == 0] 
-        return new_diabetes.todict("records")
-    else:
-        return table_diabetes
-
-
-#Change content in selected tab:
-@app.callback(
-    Output('tabs-single', 'children'),
-    Input('tabs-global', 'value')
-)
-def render_content(tab):
-    if tab == 'tab-1':
-        return html.Div([
-            checklist_hp,
-            table_hp,
-            dropdown_plot,
-            dropdown_vars
-        ])
-        
-    elif tab == 'tab-2':
-        return html.Div([
-            checklist_diabetes,
-            table_diabetes,
-            dropdown_plot_diabetes,
-            dropdown_vars_diabetes
-        ])
-
 #Change bins:
 @app.callback(
-    Output('n_s', 'children'),
+    Output('ns-hp', 'children'),
     Input('hp-bins', 'value')
 )
 def binds (pric):
@@ -268,15 +375,15 @@ def binds (pric):
 
 #Change plot type:
 @app.callback(
-    Output('plot_dp', 'children'),
+    Output('plot-dp-hp', 'children'),
     Input('dropdown-plots', 'value'),
     Input('dropdown-vars','value'),
-    Input('tabs-global', 'value'),
+    Input('tabs-global-hp', 'value'),
     Input('hp-table','data'),
-    Input('n_s','children')
+    Input('ns-hp','children')
 )
 def render_plot(dp,vars,tab,table,pric):
-    if tab=='tab-1':
+    if tab=='tab-1-hp':
             if  dp=='Scatter':
                 return html.Div([
                     html.Br(),
@@ -349,6 +456,28 @@ def display_sele_data(click):
     prices= [i['customdata'][0] for i in click['points']]
     filter=hp_data['ID'].isin(prices)
     return hp_data[filter].to_dict("records")
+
+
+###Diabtes:
+#Change content in selected tab:
+@app.callback(
+    Output('tabs-single-d', 'children'),
+    Input('tabs-global-d', 'value')
+)
+def render_content(tab):
+    if tab == 'tab-1-d':
+        return html.Div([
+            checklist_diabetes,
+            table_diabetes,
+            dropdown_plot_diabetes,
+            dropdown_vars_diabetes
+        ])
+        
+    elif tab == 'tab-2-d':
+        return None
+
+
+
 
 
 
