@@ -4,6 +4,7 @@ import dash
 from dash.dependencies import Input, Output, State
 import dash_html_components as html
 import dash_core_components as dcc
+import dash_bootstrap_components as dbc
 import dash_table as dt
 import pandas as pd
 import plotly.express as px
@@ -11,8 +12,11 @@ import json
 import numpy as np
 import plotly.graph_objects as go
 
+external_stylesheets = [dbc.themes.SOLAR]
+
 #Creating app:
-app = dash.Dash(__name__, title="Dash App")
+app = dash.Dash(__name__, title="Dash App",external_stylesheets=external_stylesheets)
+
 
 #Loading dataset "House Prices":
 col_names_hp=["price","lotsize","bedrooms","bathrooms","stories","driveway","recreation","fullbase","gasheat","aircon","garage","prefer"] 
@@ -28,12 +32,17 @@ for col in categ_cols_hp:
 
 #Checklist House prices:
 checklist_hp=html.Div([
+    html.Br(),
+    html.H4('House Prices Data table'),
+    html.Br(),
+    html.H5('Filters'),
     dcc.Checklist(id="hp-checklist",
     options=[
         {'label': 'No garage', 'value': 'garage'},
         {'label': 'No air conditioning', 'value': 'aircon'}
        
-    ]
+    ],
+    labelStyle = dict(display='block')
 ),
 html.Br()
 ])
@@ -47,7 +56,12 @@ table_hp = html.Div([
         fixed_rows={'headers': True},
         sort_action="native",
         sort_mode='multi',
-        style_table={'height': '300px', 'overflowY': 'auto'}
+        style_table={'height': '300px', 'overflowY': 'auto'},
+        style_header={'backgroundColor': 'rgb(11, 65, 86)'},
+        style_cell={
+            'backgroundColor': 'rgb(106, 146, 162)',
+            'color': 'white'
+        },
              
     ),
      html.Br()
@@ -68,22 +82,64 @@ table_diabetes = html.Div([
         fixed_rows={'headers': True},
         sort_action="native",
         sort_mode='multi',
-        style_table={'height': '300px', 'overflowY': 'auto'}
+        style_table={'height': '300px', 'overflowY': 'auto'},
+        style_header={'backgroundColor': 'rgb(11, 65, 86)'},
+        style_cell={
+            'backgroundColor': 'rgb(106, 146, 162)',
+            'color': 'white'
+        },
              
     ),
      html.Br()
+])
+
+#Checklist Dibetes:
+checklist_diabetes=html.Div([
+    html.Br(),
+    html.H4('Diabetes Data table'),
+    html.Br(),
+    html.H5('Filters'),
+    dcc.Checklist(id="diabetes-checklist",
+    options=[
+        {'label': 'Diabetes', 'value': '1'},
+        {'label': 'No Diabetes', 'value': '0'}
+       
+    ],
+    labelStyle = dict(display='block')
+),
+html.Br()
 ])
 
 
 #Dropdown plots:
 fig_names=["Histogram", "Scatter", "Boxplot"]
 dropdown_plot=html.Div([
+        html.Br(),
+        html.H4('Dynamic Plots'),
         html.Label(["Select the type of plot:",
             dcc.Dropdown(id='dropdown-plots',
                 options= [{'label': x, 'value': x} for x in fig_names],
                 value= "Histogram",
                 multi= False,
-                style={"width": "40%"}
+                style={"width": "100%"}
+            )
+            
+        ]),
+        html.Br()
+            
+])
+
+#Dropdown plots diabetes:
+dropdown_plot_diabetes=html.Div([
+        html.Br(),
+        html.H4('Dynamic Plots'),
+        html.Br(),
+        html.Label(["Select the type of plot:",
+            dcc.Dropdown(id='dropdown-plots_diabetes',
+                options= [{'label': i, 'value': i} for i in fig_names],
+                value= "Histogram",
+                multi= False,
+                style={"width": "100%"}
             )
             
         ]),
@@ -98,12 +154,24 @@ dropdown_vars=html.Div([
                 options= [{'label': x, 'value': x} for x in categ_cols_hp],
                 value= "garage",
                 multi= False,
-                style={"width": "40%"}
+                style={"width": "100%"}
             )
         ])
             
 ])
 
+#Dropdown variables:
+dropdown_vars_diabetes=html.Div([
+        html.Label(["Select a variable:",
+            dcc.Dropdown(id='dropdown-vars-diabetes',
+                options= [{'label': i, 'value': i} for i in col_diabetes],
+                value= "Pregnacies",
+                multi= False,
+                style={"width": "100%"}
+            )
+        ])
+            
+])
 
 
 #User:
@@ -130,6 +198,7 @@ app.layout = html.Div([
     Output('hp-table', 'data'),
     Input('hp-checklist', 'value')
 )
+
 def update_table(categ):
     if categ!=None:
         new_data=hp_data.loc[hp_data[categ[0]] == 0]      
@@ -137,7 +206,24 @@ def update_table(categ):
     else:
         new_data=hp_data
         return new_data.to_dict("records")
-    
+
+
+
+#Update diabetes datatable:
+@app.callback(
+    Output('table-diabetes', 'data'), 
+    Input('diabetes-checklist', 'value'))
+def update_table2(value):
+    if value==1:
+        new_diabetes = diabetes[diabetes['Outcome'] == 1] 
+        return new_diabetes.todict("records")
+
+    elif value==0:
+        new_diabetes = diabetes[diabetes['Outcome'] == 0] 
+        return new_diabetes.todict("records")
+    else:
+        return table_diabetes
+
 
 #Change content in selected tab:
 @app.callback(
@@ -155,8 +241,10 @@ def render_content(tab):
         
     elif tab == 'tab-2':
         return html.Div([
-            
-            table_diabetes
+            checklist_diabetes,
+            table_diabetes,
+            dropdown_plot_diabetes,
+            dropdown_vars_diabetes
         ])
 
 #Change bins:
@@ -181,12 +269,19 @@ def render_plot(dp,vars,tab,table,pric):
     if tab=='tab-1':
             if  dp=='Scatter':
                 return html.Div([
+                    html.Br(),
+                    html.P('Note that you can select points by clicking on the Lasso Select filter that appears on the top bar of the graph. Once the points are selected, the selected data will appear in the table below.'),
                     dcc.Graph(id="hp_scatter",
                     figure=px.scatter(table, x="price", y="lotsize", color=vars,custom_data=["price"])
                     ),
                     dt.DataTable(id="selected_data",
                         columns = hp_cols,
-                        style_table={'height': '300px', 'overflowY': 'auto'}
+                        style_table={'height': '300px', 'overflowY': 'auto'},
+                        style_header={'backgroundColor': 'rgb(11, 65, 86)'},
+                        style_cell={
+                            'backgroundColor': 'rgb(106, 146, 162)',
+                            'color': 'white'
+                        },
              
     )
                 ])
