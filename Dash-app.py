@@ -269,12 +269,19 @@ def render_plot(dp,vars,tab,table,pric):
     if tab=='tab-1':
             if  dp=='Scatter':
                 return html.Div([
+                    html.Br(),
+                    html.P('Note that you can select points by clicking on the Lasso Select filter that appears on the top bar of the graph. Once the points are selected, the selected data will appear in the table below.'),
                     dcc.Graph(id="hp_scatter",
                     figure=px.scatter(table, x="price", y="lotsize", color=vars,custom_data=["price"])
                     ),
                     dt.DataTable(id="selected_data",
                         columns = hp_cols,
-                        style_table={'height': '300px', 'overflowY': 'auto'}
+                        style_table={'height': '300px', 'overflowY': 'auto'},
+                        style_header={'backgroundColor': 'rgb(11, 65, 86)'},
+                        style_cell={
+                            'backgroundColor': 'rgb(106, 146, 162)',
+                            'color': 'white'
+                        },
              
     )
                 ])
