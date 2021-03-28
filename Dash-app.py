@@ -262,6 +262,55 @@ def render_page_content(pathname):
             html.Br(),
             html.H2("House Prices Data Set"),
             html.Br(),
+            html.H4("Context"),
+            html.P("Sales prices of houses sold in the city of Windsor, Canada, during July, August and September, 1987."),
+            html.P("The objective is to predict houses prices."),
+            html.Br(),
+            html.H4("Content"),
+            html.P("A data frame containing 546 observations on 12 variables."),
+            dcc.Markdown('''
+
+            **- Price:** Sale price of a house.
+            
+            **- lotsize:** Lot size of a property in square feet.
+            
+            **- bedrooms:** Number of bedrooms.
+            
+            **- bathrooms:** Number of full bathrooms.
+            
+            **- stories:** Number of stories excluding basement.
+            
+            **- driveway:** Factor. Does the house have a driveway?
+            
+            **- recreation:** Factor. Does the house have a recreational room?
+            
+            **- fullbase:**Factor. Does the house have a full finished basement?
+
+            **- gasheat:** Factor. Does the house use gas for hot water heating?
+           
+            **- aircon:** Factor. Is there central air conditioning?
+           
+            **- garage:** Number of garage places.
+            
+            **- gasheat:** Factor. Does the house use gas for hot water heating?
+            
+            **- prefer:** Factor. Is the house located in the preferred neighborhood of the city?
+
+           
+            #### Source
+            
+            Journal of Applied Econometrics Data Archive.
+
+            [http://qed.econ.queensu.ca/jae/1996-v11.6/anglin-gencay/]
+
+
+            #### References
+
+            Anglin, P., and Gencay, R. (1996). Semiparametric Estimation of a Hedonic Price Function. Journal of Applied Econometrics, 11, 633–648.
+
+            Verbeek, M. (2004). A Guide to Modern Econometrics, 2nd ed. Chichester, UK: John Wiley.
+            '''),
+            html.Br(),
             html.H2("Diabetes Data Set"),
             html.Br(),
             html.H4("Context"),
@@ -289,7 +338,9 @@ def render_page_content(pathname):
             
             **-  Age:** Age (years).
 
-            **- Outcome:** Class variable (0 or 1).
+            **-  Outcome:** Class variable (0 or 1).
+
+            
             ''')
             
 
